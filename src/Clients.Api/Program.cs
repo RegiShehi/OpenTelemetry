@@ -1,10 +1,12 @@
+using System.Reflection;
 using System.Text.Json.Serialization;
 using Clients.Api;
 using Clients.Api.Clients;
 using Clients.Api.Clients.Risk;
 using Clients.Api.Extensions;
-using Infrastructure.RabbitMQ;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using RiskEvaluator;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,6 +34,17 @@ builder.AddRabbitMq();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.AddHealthChecksConfiguration();
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService("Clients.Api", "Test.Course.OpenTelemetry",
+            Assembly.GetExecutingAssembly().GetName().Version!.ToString())
+        .AddAttributes([
+            new KeyValuePair<string, object>("service.environment",
+                Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development")
+        ])
+    )
+    .WithTracing(tracing => tracing.AddAspNetCoreInstrumentation().AddConsoleExporter());
 
 var app = builder.Build();
 
