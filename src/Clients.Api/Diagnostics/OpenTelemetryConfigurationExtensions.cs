@@ -21,8 +21,12 @@ public static class OpenTelemetryConfigurationExtensions
             .WithTracing(tracing => tracing
                 .AddAspNetCoreInstrumentation()
                 .AddNpgsql()
+                .AddGrpcClientInstrumentation()
+                .AddHttpClientInstrumentation()
                 .AddRedisInstrumentation()
-                .AddConsoleExporter());
+                .AddConsoleExporter()
+                .AddOtlpExporter(options => options.Endpoint = new Uri("http://jaeger:4317"))
+            );
 
         return builder;
     }
