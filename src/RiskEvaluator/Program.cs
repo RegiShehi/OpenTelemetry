@@ -1,3 +1,4 @@
+using RiskEvaluator.Diagnostics;
 using RiskEvaluator.Services;
 using RiskEvaluator.Services.Rules;
 
@@ -7,11 +8,12 @@ builder.Logging.AddConsole();
 
 builder.Services.AddHealthChecks();
 builder.Services.AddGrpc();
+builder.Services.AddOpenTelemetryConfig();
 builder.Services.AddSingleton(TimeProvider.System);
 
 builder.Services.AddSingleton<IRule, AgeRule>();
 builder.Services.AddSingleton<IRule, EmailRule>();
-builder.Services.AddSingleton<IRule, MembershipRule>(sp => new MembershipRule(
+builder.Services.AddSingleton<IRule, MembershipRule>(_ => new MembershipRule(
     builder.Configuration.GetValue<bool>("Feature:PremiumMembershipFailure")));
 
 var app = builder.Build();
