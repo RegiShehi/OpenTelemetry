@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Clients.Api;
 using Clients.Api.Clients;
 using Clients.Api.Clients.Risk;
+using Clients.Api.Diagnostics;
 using Clients.Api.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -21,13 +22,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
 builder.Services.AddDbContext<ClientsDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("ClientsDb")));
 
-IConnectionMultiplexer connectionMultiplexer =
-    ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("ClientsCache")!);
-
-builder.Services.AddSingleton(connectionMultiplexer);
-
-builder.Services.AddStackExchangeRedisCache(options =>
-    options.ConnectionMultiplexerFactory = () => Task.FromResult(connectionMultiplexer));
+builder.AddRedis();
 
 builder.Services.AddSingleton<IRiskValidator, RiskValidator>();
 
@@ -41,21 +36,7 @@ builder.AddRabbitMq();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.AddHealthChecksConfiguration();
-
-builder.Services.AddOpenTelemetry()
-    .ConfigureResource(resource => resource
-        .AddService("Clients.Api", "Test.Course.OpenTelemetry",
-            Assembly.GetExecutingAssembly().GetName().Version!.ToString())
-        .AddAttributes([
-            new KeyValuePair<string, object>("service.environment",
-                Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development")
-        ])
-    )
-    .WithTracing(tracing => tracing
-        .AddAspNetCoreInstrumentation()
-        .AddNpgsql()
-        .AddRedisInstrumentation()
-        .AddConsoleExporter());
+builder.AddOpenTelemetry();
 
 var app = builder.Build();
 
