@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Clients.Api.Clients.Risk;
+using Clients.Api.Diagnostics.Extensions;
 using Clients.Contracts.Events;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -23,16 +25,10 @@ internal static class ClientsApi
             var cacheKey = $"client-{id}";
             var clientJson = await cache.GetStringAsync(cacheKey);
 
-            if (!string.IsNullOrEmpty(clientJson))
-            {
-                return Results.Ok(JsonSerializer.Deserialize<Client>(clientJson));
-            }
+            if (!string.IsNullOrEmpty(clientJson)) return Results.Ok(JsonSerializer.Deserialize<Client>(clientJson));
 
             var client = await db.Clients.FindAsync(id);
-            if (client == null)
-            {
-                return Results.NotFound();
-            }
+            if (client == null) return Results.NotFound();
 
             clientJson = JsonSerializer.Serialize(client);
             await cache.SetStringAsync(cacheKey, clientJson, new DistributedCacheEntryOptions
@@ -70,11 +66,13 @@ internal static class ClientsApi
                     Addresses = newClient.Addresses
                 };
 
+                Activity.Current.EnrichWithClient(newClient);
+
                 db.Clients.Add(client);
                 await db.SaveChangesAsync();
 
                 eventsPublisher.Publish(client);
-                
+
                 return TypedResults.Created($"/clients/{client.Id}", client);
             });
 

@@ -15,7 +15,7 @@ public static class OpenTelemetryConfigurationExtensions
                     Assembly.GetExecutingAssembly().GetName().Version!.ToString())
                 .AddAttributes([
                     new KeyValuePair<string, object>("service.environment",
-                        Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development")
+                        builder.Environment.EnvironmentName)
                 ])
             )
             .WithTracing(tracing => tracing
@@ -26,6 +26,8 @@ public static class OpenTelemetryConfigurationExtensions
                 .AddRedisInstrumentation()
                 .AddConsoleExporter()
                 .AddOtlpExporter(options => options.Endpoint = new Uri("http://jaeger:4317"))
+                .AddOtlpExporter(options =>
+                    options.Endpoint = new Uri(builder.Configuration.GetValue<string>("Jaeger")!))
             );
 
         return builder;
