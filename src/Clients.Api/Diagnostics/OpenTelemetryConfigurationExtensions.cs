@@ -10,6 +10,8 @@ public static class OpenTelemetryConfigurationExtensions
 {
     public static WebApplicationBuilder AddOpenTelemetry(this WebApplicationBuilder builder)
     {
+        var otlpEndpoint = new Uri(builder.Configuration.GetValue<string>("OTLP_Endpoint")!);
+
         builder.Services.AddOpenTelemetry()
             .ConfigureResource(resource => resource
                 .AddService("Clients.Api", "Test.Course.OpenTelemetry",
@@ -27,7 +29,7 @@ public static class OpenTelemetryConfigurationExtensions
                 .AddRedisInstrumentation()
                 // .AddConsoleExporter()
                 .AddOtlpExporter(options =>
-                    options.Endpoint = new Uri(builder.Configuration.GetValue<string>("Jaeger")!))
+                    options.Endpoint = otlpEndpoint)
             )
             .WithMetrics(metrics => metrics
                 .AddAspNetCoreInstrumentation()
@@ -36,7 +38,7 @@ public static class OpenTelemetryConfigurationExtensions
                 .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
                 .AddMeter(ApplicationDiagnostics.Meter.Name)
                 // .AddConsoleExporter()
-                .AddPrometheusExporter()
+                .AddOtlpExporter(options => options.Endpoint = otlpEndpoint)
             );
 
         return builder;

@@ -23,8 +23,9 @@ public static class OpenTelemetryConfigurationExtensions
             )
             .WithTracing(tracing => tracing
                 .AddAspNetCoreInstrumentation()
-                .AddConsoleExporter()
-                .AddOtlpExporter(options => options.Endpoint = new Uri("http://jaeger:4317"))
+                // .AddConsoleExporter()
+                .AddOtlpExporter(options =>
+                    options.Endpoint = new Uri(Environment.GetEnvironmentVariable("OTLP_Endpoint")!))
             );
 
         return services;

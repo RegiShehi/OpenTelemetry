@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Text.Json.Serialization;
 using Clients.Api;
 using Clients.Api.Clients;
@@ -6,11 +5,7 @@ using Clients.Api.Clients.Risk;
 using Clients.Api.Diagnostics;
 using Clients.Api.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 using RiskEvaluator;
-using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,8 +44,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
 app.UseHttpsRedirection();
 
