@@ -72,7 +72,10 @@ internal static class ClientsApi
                 db.Clients.Add(client);
                 await db.SaveChangesAsync();
 
-                ApplicationDiagnostics.ClientsCreatedCounter.Add(1);
+                // More about using Exemplars in .NET here:
+                // https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/metrics/exemplars/README.md
+                ApplicationDiagnostics.ClientsCreatedCounter.Add(1,
+                    new[] { new KeyValuePair<string, object?>("clients.membership", newClient.Membership.ToString()) });
 
                 eventsPublisher.Publish(client);
 

@@ -25,13 +25,14 @@ public static class OpenTelemetryConfigurationExtensions
                 .AddGrpcClientInstrumentation()
                 .AddHttpClientInstrumentation()
                 .AddRedisInstrumentation()
-                .AddConsoleExporter()
+                // .AddConsoleExporter()
                 .AddOtlpExporter(options =>
                     options.Endpoint = new Uri(builder.Configuration.GetValue<string>("Jaeger")!))
             )
             .WithMetrics(metrics => metrics
                 .AddMeter(ApplicationDiagnostics.Meter.Name)
-                .AddConsoleExporter()
+                // .AddConsoleExporter()
+                .AddPrometheusExporter()
             );
 
         return builder;

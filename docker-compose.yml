@@ -105,3 +105,10 @@
     ports:
       - "16686:16686" # Jaeger Web UI
       - "4317:4317" # OTLP 
+  
+  prometheus:
+    image: prom/prometheus:v3.0.1
+    ports:
+      - "9090:9090"
+    volumes:
+      - '--config.file=/etc/prometheus/prometheus.yml'
