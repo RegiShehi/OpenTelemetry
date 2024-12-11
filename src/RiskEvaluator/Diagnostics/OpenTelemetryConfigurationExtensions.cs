@@ -31,9 +31,14 @@ public static class OpenTelemetryConfigurationExtensions
                     options.Endpoint = otlpEndpoint)
             )
             .WithLogging(logging => logging
-                // .AddConsoleExporter()
-                .AddOtlpExporter(options =>
-                    options.Endpoint = otlpEndpoint)
+                    // .AddConsoleExporter()
+                    .AddOtlpExporter(options =>
+                        options.Endpoint = otlpEndpoint), options =>
+                {
+                    options.IncludeFormattedMessage = true;
+                    options.IncludeFormattedMessage = true;
+                    options.ParseStateValues = true;
+                }
             );
 
         return services;
