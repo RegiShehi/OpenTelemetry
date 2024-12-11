@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Npgsql;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -25,9 +26,12 @@ public static class OpenTelemetryConfigurationExtensions
                 .AddHttpClientInstrumentation()
                 .AddRedisInstrumentation()
                 .AddConsoleExporter()
-                .AddOtlpExporter(options => options.Endpoint = new Uri("http://jaeger:4317"))
                 .AddOtlpExporter(options =>
                     options.Endpoint = new Uri(builder.Configuration.GetValue<string>("Jaeger")!))
+            )
+            .WithMetrics(metrics => metrics
+                .AddMeter(ApplicationDiagnostics.Meter.Name)
+                .AddConsoleExporter()
             );
 
         return builder;
