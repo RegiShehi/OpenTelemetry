@@ -125,6 +125,12 @@
       GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
     ports:
       - "3000:3000"
+  
+  loki:
+    image: grafana/loki:3.2.2
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.103.0
@@ -142,3 +148,4 @@
     depends_on:
       - jaeger
       - prometheus
+      - loki

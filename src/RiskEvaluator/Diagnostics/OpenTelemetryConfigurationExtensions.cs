@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -9,6 +10,8 @@ public static class OpenTelemetryConfigurationExtensions
     public static IServiceCollection AddOpenTelemetryConfig(this IServiceCollection services)
     {
         const string serviceName = "RiskEvaluator";
+
+        var otlpEndpoint = new Uri(Environment.GetEnvironmentVariable("OTLP_Endpoint")!);
 
         services.AddOpenTelemetry()
             .ConfigureResource(resource => resource
@@ -25,7 +28,12 @@ public static class OpenTelemetryConfigurationExtensions
                 .AddAspNetCoreInstrumentation()
                 // .AddConsoleExporter()
                 .AddOtlpExporter(options =>
-                    options.Endpoint = new Uri(Environment.GetEnvironmentVariable("OTLP_Endpoint")!))
+                    options.Endpoint = otlpEndpoint)
+            )
+            .WithLogging(logging => logging
+                // .AddConsoleExporter()
+                .AddOtlpExporter(options =>
+                    options.Endpoint = otlpEndpoint)
             );
 
         return services;

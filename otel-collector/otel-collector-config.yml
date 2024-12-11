@@ -25,29 +25,37 @@ processors:
 
 exporters:
   debug:
-  otlp:
+  otlp/jaeger:
     endpoint: "${JAEGER_ENDPOINT}"
     tls:
       insecure: true
   prometheus:
     endpoint: "0.0.0.0:8889"
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    tls:
+      insecure: true
 
 service:
   pipelines:
     traces:
       receivers:
         - otlp
-      processors: [memory_limiter, attributes, batch]
+      processors: [ memory_limiter, attributes, batch ]
       exporters:
         - debug
-        - otlp
+        - otlp/jaeger
     metrics:
       receivers:
         - otlp
-      processors: [memory_limiter, batch]
+      processors: [ memory_limiter, batch ]
       exporters:
         - debug
         - prometheus
+    logs:
+      receivers: [ otlp ]
+      processors: [ ]
+      exporters: [ loki, debug ]
 
   extensions:
     - health_check

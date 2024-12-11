@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Npgsql;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -39,6 +40,11 @@ public static class OpenTelemetryConfigurationExtensions
                 .AddMeter(ApplicationDiagnostics.Meter.Name)
                 // .AddConsoleExporter()
                 .AddOtlpExporter(options => options.Endpoint = otlpEndpoint)
+            )
+            .WithLogging(logging => logging
+                // .AddConsoleExporter()
+                .AddOtlpExporter(options =>
+                    options.Endpoint = otlpEndpoint)
             );
 
         return builder;
